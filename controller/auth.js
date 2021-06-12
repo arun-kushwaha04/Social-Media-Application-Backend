@@ -5,7 +5,6 @@ const client = require('../configs/db');
 //creating a sign up method 
 exports.signUp = (req, res) => {
     const { username, name, email, password } = req.body;
-    console.log('hi');
     //checking if a user already exist with given email id
     client.query(`SELECT * FROM users WHERE email = '${email}' OR username = '${username}'`, (err, data) => {
         //if error occured
@@ -33,10 +32,11 @@ exports.signUp = (req, res) => {
                                 email: email,
                                 username: username,
                             },
-                            process.env.SECRET_KEY, { expiresIn: '20m' }
+                            process.env.SECRET_KEY, { expiresIn: '2m' }
                         );
                         //making a query at database to add the user.
-                        client.query(`INSERT INTO users (username, email, name, isVerified, isLoggedin, password, token) VALUES  ('${username}', '${email}', '${name}', 0, 0, '${hash}', '${token}'); `, (err) => {
+                        const profilePhotoUrl = 'https://firebasestorage.googleapis.com/v0/b/dubify-7f0f8.appspot.com/o/Profile-Photos%2F51f6fb256629fc755b8870c801092942.png?alt=media&token=f67200e6-85c6-49a8-afe1-9ebd06a298c5';
+                        client.query(`INSERT INTO users (username, email, name, isVerified, isLoggedin, password, profilePhoto) VALUES  ('${username}', '${email}', '${name}', 0, 0, '${hash}', '${profilePhotoUrl}'); `, (err) => {
                             if (err) {
                                 console.log(`Error occured in adding user\n ${err.message}`);
                                 res.status(500).json({ message: 'Internal Server Error Please Try Again', });
@@ -181,34 +181,75 @@ exports.resetPassword = (req, res) => {
     });
 };
 
+//verifcation of email sent to user
 exports.verifyEmail = (req, res) => {
-    const userToken = req.headers.authorization;
-    const email = req.body.email;
-    console.log(email);
-    client.query(`SELECT * FROM users WHERE email = '${email}';`, (err, data) => {
-        //if error occured
+    const token = req.headers.authorization;
+    jwt.verify(token, process.env.SECRET_KEY, (err, result) => {
         if (err) {
-            console.log(`Error occured in searching users\n ${err}`);
-            res.status(500).json({ message: 'Internal Server Error Please Try Again', });
-        }
-        //else move forward
-        else {
-            const token = data.rows[0].usertoken;
-            if (token === userToken) {
-                client.query(`UPDATE users SET isVerified = 1 WHERE email = '${email}';`, (err) => {
+            res.status(500).json({
+                message: "Internal Error Ocurred",
+            })
+        } else {
+            if (result) {
+                const username = result.username;
+                const email = result.email;
+                const name = result.name;
+                client.query(`SELECT * FROM users WHERE email = '${email}';`, (err, data) => {
                     if (err) {
-                        res.status(500).json({ message: 'Internal Server Error Please Try Again', });
+                        console.log(err.message);
+                        res.status(500).json({
+                            message: "Internal server Error",
+                        })
                     } else {
-                        res.status(200).json({ message: 'Email Verified Succesfully, Would Be Directed To Login Page Shortly.' })
+                        if (data.rows.length === 0 || data.rows[0].name !== name || data.rows[0].username !== username) {
+                            console.log("Inavalid Token");
+                            res.status(400).json({
+                                message: "Invalid Token",
+                            })
+                        } else {
+                            client.query(`UPDATE users SET isVerified = 1 WHERE email = '${email}';`, (err) => {
+                                if (err) {
+                                    res.status(500).json({ message: 'Internal Server Error Please Try Again', });
+                                } else {
+                                    res.status(200).json({ message: 'Email Verified Succesfully, Would Be Directed To Login Page Shortly.' })
+                                }
+                            })
+                        }
                     }
                 })
             } else {
-                res.status(400).json({ message: 'Verification Link Expired' })
+                res.status(400).json({ message: "Token Expired" })
             }
         }
-    });
+    })
 }
 
+//resending the verifcation email
 exports.resendVerificationLink = (req, res) => {
-
+    const email = req.body.email;
+    client.query(`SELECT * FROM users WHERE email = '${email}';`, (err, data) => {
+        if (err) {
+            console.log(err.message);
+            res.status(500).json({
+                message: "Internal server Error",
+            })
+        } else {
+            const email = data.rows[0].email;
+            const name = data.rows[0].name;
+            const username = data.rows[0].username;
+            const token = jwt.sign({
+                    name: name,
+                    email: email,
+                    username: username,
+                },
+                process.env.SECRET_KEY, { expiresIn: '2m' }
+            );
+            res.status(200).json({
+                message: `Verification Email Sent`,
+                userToken: token,
+                domain: process.env.DOMAIN,
+                key: process.env.KEY,
+            });
+        }
+    })
 }
