@@ -15,6 +15,16 @@ exports.signUp = (req, res) => {
         //else move forward
         else {
             const userExists = data.rows.length;
+            if (userExists === 2) {
+                if (data.rows[0].username === username || data.rows[1].username === username) {
+                    res.status(400).json({ message: 'Username already In Use.' });
+                }
+            }
+            if (userExists == 1) {
+                if (data.rows[0].username === username) {
+                    res.status(400).json({ message: 'Username already In Use.' });
+                }
+            }
             if (userExists !== 0) {
                 res.status(400).json({ message: 'Email Already Registered, Try to Login', });
             }
@@ -63,7 +73,7 @@ exports.signUp = (req, res) => {
 exports.login = (req, res) => {
     const { email, password } = req.body;
     //checking if a user already exist with given email id
-    client.query(`SELECT * FROM users WHERE email = '${email}'`, (err, data) => {
+    client.query(`SELECT * FROM users WHERE email = '${email}' OR username = '${email}';`, (err, data) => {
         //if error occured
         if (err) {
             console.log(`Error occured in searching users\n ${err}`);
@@ -72,11 +82,19 @@ exports.login = (req, res) => {
         //else move forward
         else {
             const userExists = data.rows.length;
-            if (userExists == 0) {
+            if (userExists === 0) {
                 res.status(400).json({ message: 'No Such User Exists Try Registering Yourself', });;
             }
             //If user exist then check credentials
             else {
+                //checking if user email is Verified
+                if (data.rows[0].isverified === 0) {
+                    res.status(400).json({ message: 'Please Verify Your Email' });
+                }
+                //If user logged in other device
+                if (data.rows[0].isloggedin === 1) {
+                    res.status(400).json({ message: 'You Are Logged In Ohter Device Please Log Out.' });
+                }
                 //comparing hash password
                 bcrypt.compare(password, data.rows[0].password, (err, result) => {
                     if (err) {
@@ -94,12 +112,17 @@ exports.login = (req, res) => {
                                 },
                                 process.env.SECRET_KEY, { expiresIn: '2d' }
                             );
-                            //finally logging in the user
-                            res.status(200).json({
-                                message: 'User Logged in successfully',
-                                dashboardUrl: '/Pages/Dashboard/index.html',
-                                userToken: token,
-                            })
+                            client.query(`UPDATE users SET isLoggedin = 1 WHERE email = '${email}' OR username = '${email}';`, err => {
+                                if (err) {
+                                    console.log(`Error occured in comparing password\n ${err}`);
+                                    res.status(500).json({ message: 'Internal Server Error Please Try Again', });
+                                }
+                                res.status(200).json({
+                                    message: 'User Logged in successfully',
+                                    dashboardUrl: '/Pages/Dashboard/index.html',
+                                    userToken: token,
+                                })
+                            });
                         }
                     }
                 });
