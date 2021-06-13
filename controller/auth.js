@@ -117,6 +117,7 @@ exports.login = (req, res) => {
                                     console.log(`Error occured in comparing password\n ${err}`);
                                     res.status(500).json({ message: 'Internal Server Error Please Try Again', });
                                 }
+                                console.log('LOGGED IN SUCCESSFULLY');
                                 res.status(200).json({
                                     message: 'User Logged in successfully',
                                     dashboardUrl: '/Pages/Dashboard/index.html',
