@@ -8,6 +8,7 @@ app.use(express.json());
 const client = require('./configs/db');
 const imageRoute = require('./routes/uploadImage');
 const authRoute = require('./routes/auth');
+const feedRoute = require('./routes/feed');
 const userRoute = require('./routes/profile');
 
 
@@ -26,6 +27,7 @@ app.get('/', (req, res) => {
 })
 app.use('/auth', authRoute);
 app.use('/user', userRoute);
+app.use('/feed', feedRoute);
 app.use('/uploadImage', imageRoute);
 
 

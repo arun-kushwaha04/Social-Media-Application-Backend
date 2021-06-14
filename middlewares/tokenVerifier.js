@@ -28,7 +28,7 @@ exports.verifyToken = (req, res, next) => {
                             })
                         } else {
                             req.userId = userId;
-                            req.userusername = username;
+                            req.username = username;
                             req.name = name;
                             req.email = email;
                             next();
