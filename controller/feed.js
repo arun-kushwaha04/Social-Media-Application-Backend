@@ -68,3 +68,17 @@ exports.deleteUserPost = (req, res) => {
         }
     });
 }
+
+exports.getFollowingPosts = (req, res) => {
+    client.query(`SELECT * FROM feeds INNER JOIN follower ON feeds.userid = follower.following AND follower.follower = ${req.userId};`, (err, data) => {
+        if (err) {
+            console.log(err);
+            res.status(500).json({ message: "Internal Server Error" });
+        } else {
+            res.status(200).json({
+                message: "Following Post Retervied Successfully",
+                post: data.rows,
+            });
+        }
+    })
+}

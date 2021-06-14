@@ -5,8 +5,9 @@ exports.verifyToken = (req, res, next) => {
     const token = req.headers.authorization;
     jwt.verify(token, process.env.SECRET_KEY, (err, result) => {
         if (err) {
-            res.status(500).json({
-                message: "Internal Error Ocurred",
+            console.log('here');
+            res.status(400).json({
+                message: "Token Expired",
             })
         } else {
             if (result) {
@@ -24,7 +25,7 @@ exports.verifyToken = (req, res, next) => {
                         if (data.rows.length === 0 || data.rows[0].name !== name || data.rows[0].id !== userId || data.rows[0].username !== username) {
                             console.log("Inavalid Token");
                             res.status(400).json({
-                                message: "Token Experied",
+                                message: "Invalid Token",
                             })
                         } else {
                             req.userId = userId;

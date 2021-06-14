@@ -92,42 +92,43 @@ exports.login = (req, res) => {
                     res.status(400).json({ message: 'Please Verify Your Email' });
                 }
                 //If user logged in other device
-                if (data.rows[0].isloggedin === 1) {
+                else if (data.rows[0].isloggedin === 1) {
                     res.status(400).json({ message: 'You Are Logged In Ohter Device Please Log Out.' });
-                }
-                //comparing hash password
-                bcrypt.compare(password, data.rows[0].password, (err, result) => {
-                    if (err) {
-                        console.log(`Error occured in comparing password\n ${err}`);
-                        res.status(500).json({ message: 'Internal Server Error Please Try Again', });
-                    } else {
-                        if (!result) {
-                            res.status(401).json({ message: 'Invalid Password', });
+                } else {
+                    //comparing hash password
+                    bcrypt.compare(password, data.rows[0].password, (err, result) => {
+                        if (err) {
+                            console.log(`Error occured in comparing password\n ${err}`);
+                            res.status(500).json({ message: 'Internal Server Error Please Try Again', });
                         } else {
-                            //creating token for user
-                            const token = jwt.sign({
-                                    userId: data.rows[0].id,
-                                    name: data.rows[0].name,
-                                    username: data.rows[0].username,
-                                    email: data.rows[0].email,
-                                },
-                                process.env.SECRET_KEY, { expiresIn: '2d' }
-                            );
-                            client.query(`UPDATE users SET isLoggedin = 1 WHERE email = '${email}' OR username = '${email}';`, err => {
-                                if (err) {
-                                    console.log(`Error occured in comparing password\n ${err}`);
-                                    res.status(500).json({ message: 'Internal Server Error Please Try Again', });
-                                }
-                                console.log('LOGGED IN SUCCESSFULLY');
-                                res.status(200).json({
-                                    message: 'User Logged in successfully',
-                                    dashboardUrl: '/Pages/Dashboard/index.html',
-                                    userToken: token,
-                                })
-                            });
+                            if (!result) {
+                                res.status(401).json({ message: 'Invalid Password', });
+                            } else {
+                                //creating token for user
+                                const token = jwt.sign({
+                                        userId: data.rows[0].id,
+                                        name: data.rows[0].name,
+                                        username: data.rows[0].username,
+                                        email: data.rows[0].email,
+                                    },
+                                    process.env.SECRET_KEY, { expiresIn: '1m' }
+                                );
+                                client.query(`UPDATE users SET isLoggedin = 1 WHERE email = '${email}' OR username = '${email}';`, err => {
+                                    if (err) {
+                                        console.log(`Error occured in comparing password\n ${err}`);
+                                        res.status(500).json({ message: 'Internal Server Error Please Try Again', });
+                                    }
+                                    // console.log('LOGGED IN SUCCESSFULLY');
+                                    res.status(200).json({
+                                        message: 'User Logged in successfully',
+                                        dashboardUrl: '/Pages/Dashboard/index.html',
+                                        userToken: token,
+                                    })
+                                });
+                            }
                         }
-                    }
-                });
+                    });
+                }
             }
         }
     });
