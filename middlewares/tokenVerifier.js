@@ -5,7 +5,7 @@ exports.verifyToken = (req, res, next) => {
     const token = req.headers.authorization;
     jwt.verify(token, process.env.SECRET_KEY, (err, result) => {
         if (err) {
-            console.log('here');
+            console.log('here invalid token');
             res.status(400).json({
                 message: "Token Expired",
             })

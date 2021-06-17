@@ -3,14 +3,15 @@ const client = require('../configs/db');
 //Adding the post of the user
 exports.addPost = (req, res) => {
     const { description, image } = req.body;
-    const images = '[';
-    image.forEach(element => {
-        const temp = `${element}`;
-        images += temp;
-    });
+    // const images = '[';
+    // image.forEach(element => {
+    //     const temp = `${element}`;
+    //     images += temp;
+    // });
+    const images = image;
     client.query(`BEGIN TRANSACTION;
-    INSERT INTO posts (userId, userusername, originaialUserId, originalUsername, description, images, postlikes, postcomments, postshares) VALUES (${req.userId}, '${req.username}', ${req.userId}, '${req.username}', '${description}', '{${images}}', 0, 0, 0);
-    UPDATE users SET postcount = users.postcount+1 WHERE userid = ${userid};
+    INSERT INTO posts (userId, userusername, originalUserId, originalUsername, description, images, postlikes, postcomments, postshare) VALUES (${req.userId}, '${req.username}', ${req.userId}, '${req.username}', '${description}', '{${images}}', 0, 0, 0);
+    UPDATE users SET postmade = users.postmade + 1 WHERE id = ${req.userId};
     COMMIT;
     `, err => {
         if (err) {
@@ -26,14 +27,14 @@ exports.addPost = (req, res) => {
 
 //getting user post
 exports.getUserPost = (req, res) => {
-    client.query(`SELECT * FROM posts WHERE userId = ${req.userId}`, (err, data) => {
+    client.query(`SELECT * FROM users inner join posts ON posts.userid = users.id WHERE posts.userid = ${req.userId}`, (err, data) => {
         if (err) {
             console.log(err);
             res.status(500).json({ message: "Internal Server Error" });
         } else {
             res.status(200).json({
-                message: "posts Reterived Successfully",
-                posts: data.rows,
+                message: "Posts Reterived Successfully",
+                post: data.rows,
             });
         }
     });
@@ -167,7 +168,7 @@ exports.commentPost = (req, res) => {
     client.query(`BEGIN TRANSACTION;
             update users
             SET share = users.comment + 1
-            where
+            WHERE
             id = ${userid} or id = ${originaluserid};
             update posts
             SET postshare = posts.postcomment + 1 

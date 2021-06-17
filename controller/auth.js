@@ -111,19 +111,19 @@ exports.login = (req, res) => {
                                         username: data.rows[0].username,
                                         email: data.rows[0].email,
                                     },
-                                    process.env.SECRET_KEY, { expiresIn: '1m' }
+                                    process.env.SECRET_KEY, { expiresIn: '30d' }
                                 );
                                 client.query(`UPDATE users SET isLoggedin = 1 WHERE email = '${email}' OR username = '${email}';`, err => {
                                     if (err) {
                                         console.log(`Error occured in comparing password\n ${err}`);
                                         res.status(500).json({ message: 'Internal Server Error Please Try Again', });
                                     }
-                                    // console.log('LOGGED IN SUCCESSFULLY');
+                                    console.log('LOGGED IN SUCCESSFULLY');
                                     res.status(200).json({
                                         message: 'User Logged in successfully',
                                         userToken: token,
-                                        userId: req.userId,
-                                        username: req.username,
+                                        userId: data.rows[0].id,
+                                        username: data.rows[0].username,
                                     })
                                 });
                             }
