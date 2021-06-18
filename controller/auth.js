@@ -124,6 +124,7 @@ exports.login = (req, res) => {
                                         userToken: token,
                                         userId: data.rows[0].id,
                                         username: data.rows[0].username,
+                                        profilePhoto: data.rows[0].profilephoto,
                                     })
                                 });
                             }
