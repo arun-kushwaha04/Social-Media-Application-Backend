@@ -10,6 +10,7 @@ const imageRoute = require('./routes/uploadImage');
 const authRoute = require('./routes/auth');
 const feedRoute = require('./routes/feed');
 const userRoute = require('./routes/profile');
+const friendRoute = require('./routes/follower');
 
 
 //connecting to database
@@ -29,6 +30,7 @@ app.use('/auth', authRoute);
 app.use('/user', userRoute);
 app.use('/feed', feedRoute);
 app.use('/uploadImage', imageRoute);
+app.use('/friend', friendRoute);
 
 
 app.listen(port, () => {

@@ -23,7 +23,7 @@ exports.addPost = (req, res) => {
 
 //getting user post
 exports.getUserPost = (req, res) => {
-    client.query(`SELECT * FROM users inner join posts ON posts.userid = users.id WHERE posts.userid = ${req.userId}`, (err, data) => {
+    client.query(`SELECT * FROM posts WHERE userid = ${req.userId}`, (err, data) => {
         if (err) {
             console.log(err);
             res.status(500).json({ message: "Internal Server Error" });
@@ -120,7 +120,7 @@ exports.updateLike = (req, res) => {
 }
 
 //share a post of the user
-exports.updateshare = (req, res) => {
+exports.updateShare = (req, res) => {
     const { postId } = req.body;
     client.query(`SELECT * FROM posts WHERE postID = ${postId}`, (err, data) => {
         if (err) {
