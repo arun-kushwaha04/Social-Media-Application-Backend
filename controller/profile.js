@@ -151,3 +151,36 @@ exports.updatePassword = (req, res) => {
         }
     })
 }
+
+exports.updateAbout = (req, res) => {
+
+    const userPassword = req.body.password;
+    const userAbout = req.body.about;
+
+    client.query(`SELECT * FROM users WHERE email = '${req.email}'`, (err, data) => {
+        if (err) {
+            res.status(500).json({ message: "Internal Server Error", });
+        } else {
+            const hashPassword = data.rows[0].password;
+            bcrypt.compare(userPassword, hashPassword, (err, result) => {
+                if (err) {
+                    res.status(500).json({ message: "Internal Server Error", });
+                } else {
+                    if (!result) {
+                        res.status(400).json({ message: "Invalid Password", });
+                    } else {
+                        client.query(`UPDATE users SET about='${userAbout}' WHERE email='${req.email}'`, err => {
+                            if (err) {
+                                res.status(500).json({ message: "Internal Server Error", });
+                            } else {
+                                res.status(200).json({
+                                    message: "About Updated successfully",
+                                });
+                            }
+                        })
+                    }
+                }
+            });
+        }
+    })
+}
