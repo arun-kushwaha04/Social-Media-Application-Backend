@@ -20,6 +20,32 @@ exports.userData = (req, res) => {
     });
 }
 
+exports.userInfo = (req, res) => {
+    client.query(`SELECT * FROM users WHERE email = '${req.body.email}';`)
+    .then((data)=>{
+        const userData = {
+            email : req.body.email,
+            name : data.name,
+            photo: data.profilephoto,
+            likes: data.likes,
+            followers : data.followercount,
+            posts : data.postmade,
+            following : data.foloowingcount,
+            about : data.about,
+        }
+        res.status(200).json({
+            message: "Fetched succesfully",
+            userData : userData,
+          });
+    })
+    .catch((err) => {
+        console.log(err);
+        res.status(500).json({
+          error: "Fetching Error",
+        });
+      });
+}
+
 exports.updateEmail = (req, res) => {
     const userEmail = req.body.email;
     const userPassword = req.body.password;
