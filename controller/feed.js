@@ -96,28 +96,64 @@ exports.getFollowingPosts = (req, res) => {
 
 //update like on a post
 exports.updateLike = (req, res) => {
-    const { postId, value, userid, originaluserid } = req.body;
-    client.query(`BEGIN TRANSACTION;
-            update users
-            SET likes = users.likes + ${value} 
-            where
-            id = ${userid} or id = ${originaluserid};
-            update posts
-            SET postlikes = posts.postlikes + ${value} 
-            where
-            postid = ${postId} 
-            COMMIT;
-            `, err => {
+    const { postid, originaluserid, userid } = req.body;
+    let value;
+    let message;
+    let query;
+    client.query(`SELECT * FROM likes WHERE postid = ${postid} and userid = ${req.userId};`, (err, data) => {
         if (err) {
             console.log(err);
             res.status(500).json({ message: "Internal Server Error" });
         } else {
-            res.status(200).json({
-                message: "You Liked The Post ",
-            });
+            if (data.rows.length === 1) {
+                query = `DELETE FROM likes WHERE postid = ${postid} and userid = ${req.userId};`
+                value = -1;
+                message = `Post Disliked`;
+            } else {
+                query = `INSERT INTO likes VALUES (${postid},${req.userId});`
+                value = 1;
+                message = `Post Liked`;
+            }
+            client.query(`
+        BEGIN TRANSACTION;
+            UPDATE users SET likes = users.likes + ${value} WHERE id = ${userid} or id = ${originaluserid};
+            update posts SET postlikes = posts.postlikes + ${value} WHERE postid = ${postid};
+            ${query}
+        COMMIT;
+            `, err => {
+                if (err) {
+                    console.log('hi');
+                    console.log(err);
+                    res.status(500).json({ message: "Internal Server Error" });
+                } else {
+                    res.status(200).json({
+                        message,
+                        value,
+                    });
+                }
+            })
         }
     })
 }
+
+//is post Liked
+exports.isLiked = (req, res) => {
+    const postid = req.body.postid;
+    client.query(`SELECT * FROM likes WHERE postid = ${postid} and userid = ${req.userId};`, (err, data) => {
+        if (err) {
+            console.log(err);
+            res.status(500).json({ message: "Internal Server Error" });
+        } else {
+            if (data.rows.length === 1) {
+                res.status(200).json({ message: "Post Is Liked" });
+            } else {
+                res.status(200).json({ message: "Post Is Not Liked" });
+            }
+        }
+    })
+
+}
+
 
 //share a post of the user
 exports.updateShare = (req, res) => {
@@ -160,23 +196,20 @@ exports.updateShare = (req, res) => {
 
 //making comment on the post of the user
 exports.commentPost = (req, res) => {
-    const { postId, comment } = req.body;
-    client.query(`BEGIN TRANSACTION;
-            update users
-            SET share = users.comment + 1
-            WHERE
-            id = ${userid} or id = ${originaluserid};
-            update posts
-            SET postshare = posts.postcomment + 1 
-            where
-            postid = ${postId} 
-            COMMIT;
+    const { postid, comment, originaluserid, dateTime, profilePhoto } = req.body;
+    console.log(req.body);
+    client.query(`
+    BEGIN TRANSACTION;
+        UPDATE users SET comments = users.comments + 1 WHERE id = ${req.userId} or id = ${originaluserid};
+        UPDATE posts SET postcomments = posts.postcomments + 1 WHERE postid = ${postid};
+        INSERT INTO comment (postid, userid, username, comment, datetime, profilephoto) VALUES (${postid},${req.userId},'${req.username}','${comment}','${dateTime}','${profilePhoto}');
+    COMMIT;
             `, err => {
         if (err) {
+            console.log('error here');
             console.log(err);
             res.status(500).json({ message: "Internal Server Error" });
         } else {
-            client.query(`INSERT INTO comment (postId, userid, username, comment) VALUES (${postId},${userid},'${username}','${comment}');`);
             res.status(200).json({
                 message: "Comment Made Successfully",
             });
@@ -186,8 +219,8 @@ exports.commentPost = (req, res) => {
 
 //getting the comment on a post
 exports.getAllPostComment = (req, res) => {
-    postId = req.body.postId;
-    client.query(`SELECT * FROM comment WHERE postId = ${postId};`, (err, data) => {
+    postid = req.body.postid;
+    client.query(`SELECT * FROM comment WHERE postId = ${postid};`, (err, data) => {
         if (err) {
             console.log(err);
             res.status(500).json({ message: "Internal Server Error" });
