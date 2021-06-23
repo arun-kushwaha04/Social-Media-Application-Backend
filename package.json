@@ -27,6 +27,7 @@
         "firebase": "^8.6.7",
         "firebase-admin": "^9.9.0",
         "jsonwebtoken": "^8.5.1",
+        "nodemon": "^2.0.7",
         "pg": "^8.6.0"
     },
     "engines": {

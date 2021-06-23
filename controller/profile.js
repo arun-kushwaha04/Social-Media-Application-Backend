@@ -21,17 +21,18 @@ exports.userData = (req, res) => {
 }
 
 exports.userInfo = (req, res) => {
-    client.query(`SELECT * FROM users WHERE email = '${req.body.email}';`)
+    client.query(`SELECT * FROM users WHERE email = '${req.email}';`)
     .then((data)=>{
+        console.log(data.rows[0]);
         const userData = {
             email : req.body.email,
-            name : data.name,
-            photo: data.profilephoto,
-            likes: data.likes,
-            followers : data.followercount,
-            posts : data.postmade,
-            following : data.foloowingcount,
-            about : data.about,
+            name : data.rows[0].name,
+            photo: data.rows[0].profilephoto,
+            likes: data.rows[0].likes,
+            followers : data.rows[0].followercount,
+            posts : data.rows[0].postmade,
+            following : data.rows[0].followingcount,
+            about : data.rows[0].about,
         }
         res.status(200).json({
             message: "Fetched succesfully",
