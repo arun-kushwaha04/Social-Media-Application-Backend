@@ -2,11 +2,11 @@ const client = require('../configs/db');
 
 //Adding the post of the user
 exports.addPost = (req, res) => {
-    const { description, image, profilePhoto } = req.body;
+    const { description, image, profilePhoto, dateTime } = req.body;
     console.log(image);
     const images = image;
     client.query(`BEGIN TRANSACTION;
-    INSERT INTO posts (userId, userusername, originalUserId, originalUsername, description, images, postlikes, postcomments, postshare, profilePhoto) VALUES (${req.userId}, '${req.username}', ${req.userId}, '${req.username}', '${description}', '{${images}}', 0, 0, 0, '${profilePhoto}');
+    INSERT INTO posts (userId, userusername, originalUserId, originalUsername, description, images, postlikes, postcomments, postshare, profilephoto,datetime) VALUES (${req.userId}, '${req.username}', ${req.userId}, '${req.username}', '${description}', '{${images}}', 0, 0, 0, '${profilePhoto}','${dateTime}');
     UPDATE users SET postmade = users.postmade + 1 WHERE id = ${req.userId};
     COMMIT;
     `, err => {

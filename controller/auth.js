@@ -93,7 +93,7 @@ exports.login = (req, res) => {
                 }
                 //If user logged in other device
                 else if (data.rows[0].isloggedin === 1) {
-                    res.status(400).json({ message: 'You Are Logged In Ohter Device Please Log Out' });
+                    res.status(400).json({ message: 'You Are Logged In Other Device Please Log Out' });
                 } else {
                     //comparing hash password
                     bcrypt.compare(password, data.rows[0].password, (err, result) => {
