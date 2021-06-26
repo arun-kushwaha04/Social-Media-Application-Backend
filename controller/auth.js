@@ -281,3 +281,18 @@ exports.resendVerificationLink = (req, res) => {
         }
     })
 }
+
+exports.logout = (req, res) => {
+    client.query(`UPDATE users SET isLoggedin = 0 WHERE email = '${req.email}';`)
+    .then((data)=>{
+        console.log("Logged Out succesfully");
+        res.status(200).json({
+            message:"Logged out succesfully",
+        });
+    })
+    .catch((err)=>{
+        res.status(500).json({
+            error:"Error Occured",
+        });
+    });
+}
