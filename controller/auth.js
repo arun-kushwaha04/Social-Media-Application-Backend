@@ -42,11 +42,11 @@ exports.signUp = (req, res) => {
                                 email: email,
                                 username: username,
                             },
-                            process.env.SECRET_KEY, { expiresIn: '2m' }
+                            process.env.SECRET_KEY, { expiresIn: '5m' }
                         );
                         //making a query at database to add the user.
                         const profilePhotoUrl = 'https://firebasestorage.googleapis.com/v0/b/dubify-7f0f8.appspot.com/o/Profile-Photos%2F51f6fb256629fc755b8870c801092942.png?alt=media&token=f67200e6-85c6-49a8-afe1-9ebd06a298c5';
-                        client.query(`INSERT INTO users (username, email, name, isVerified, isLoggedin, password, profilePhoto, likes, comments, share, followercount, postmade, followingcount, about) VALUES  ('${username}', '${email}', '${name}', 0, 0, '${hash}', '${profilePhotoUrl}', 0, 0, 0, 0, 0, 0, " "); `, (err) => {
+                        client.query(`INSERT INTO users (username, email, name, isVerified, isLoggedin, password, profilePhoto, likes, comments, share, followercount, postmade, followingcount, about) VALUES  ('${username}', '${email}', '${name}', 0, 0, '${hash}', '${profilePhotoUrl}', 0, 0, 0, 0, 0, 0, ''); `, (err) => {
                             if (err) {
                                 console.log(`Error occured in adding user\n ${err.message}`);
                                 res.status(500).json({ message: 'Internal Server Error Please Try Again', });
@@ -270,7 +270,7 @@ exports.resendVerificationLink = (req, res) => {
                     email: email,
                     username: username,
                 },
-                process.env.SECRET_KEY, { expiresIn: '2m' }
+                process.env.SECRET_KEY, { expiresIn: '5m' }
             );
             res.status(200).json({
                 message: `Verification Email Sent`,
