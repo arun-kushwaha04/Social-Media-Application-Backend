@@ -47,3 +47,33 @@ exports.getFollower = (req, res) => {
         }
     })
 }
+
+exports.getUserList = (req, res) => {
+    client.query(`SELECT id, username, email, likes, profilephoto FROM users`, (err, users) => {
+        if (err) {
+            console.log(err);
+            res.status(500).json({ message: 'Internal Server Error', });
+        } else {
+            res.status(200).json({
+                message: 'Users Reterived Successfully',
+                users,
+            })
+        }
+    })
+}
+
+
+exports.getSuggestionList = function(req, res) {
+    client.query(`SELECT id, username, profilephoto FROM users WHERE id NOT IN ( SELECT following FROM follower WHERE follower = ${req.userId}) AND NOT id = ${req.userId} ORDER BY likes DESC;`, (err, data) => {
+        if (err) {
+            console.log(err);
+            res.status(500).json({ message: 'Internal Server Error', });
+        } else {
+            const users = data.rows;
+            res.status(200).json({
+                message: 'Users Reterived Successfully',
+                users,
+            })
+        }
+    })
+}

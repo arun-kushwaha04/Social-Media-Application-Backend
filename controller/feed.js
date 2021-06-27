@@ -23,7 +23,7 @@ exports.addPost = (req, res) => {
 
 //getting user post
 exports.getUserPost = (req, res) => {
-    client.query(`SELECT * FROM posts WHERE userid = ${req.userId}`, (err, data) => {
+    client.query(`SELECT * FROM posts WHERE userid = ${req.userId} ORDER BY postid DESC;`, (err, data) => {
         if (err) {
             console.log(err);
             res.status(500).json({ message: "Internal Server Error" });
@@ -81,7 +81,7 @@ exports.deleteUserPost = (req, res) => {
 
 //get the post of following user
 exports.getFollowingPosts = (req, res) => {
-    client.query(`SELECT * FROM posts INNER JOIN follower ON posts.userid = follower.following AND follower.follower = ${req.userId};`, (err, data) => {
+    client.query(`SELECT * FROM posts INNER JOIN follower ON posts.userid = follower.following AND follower.follower = ${req.userId} ORDER BY postid DESC;`, (err, data) => {
         if (err) {
             console.log(err);
             res.status(500).json({ message: "Internal Server Error" });
@@ -158,7 +158,7 @@ exports.isLiked = (req, res) => {
 //share a post of the user
 exports.sharePost = (req, res) => {
     const { postid, profilephoto, dateTime, originalpostid } = req.body;
-    client.query(`SELECT * FROM shareposts WHERE userid = ${req.userId} and postid = ${postid}`, (err, data) => {
+    client.query(`SELECT * FROM shareposts WHERE userid = ${req.userId} and postid = ${originalpostid}`, (err, data) => {
         if (err) {
             console.log(err);
             res.status(500).json({ message: "Internal Server Error" });
@@ -174,7 +174,7 @@ exports.sharePost = (req, res) => {
                         console.log(err);
                         res.status(500).json({ message: "Internal Server Error" });
                     } else {
-                        client.query(`INSERT INTO posts (originalpostid,userId, userusername, originaluserid, originalUsername, description, images, postlikes, postcomments, postshare, profilephoto, datetime) VALUES (${originalpostid},${req.userId}, '${req.username}', ${data.rows[0].userid}, '${data.rows[0].userusername}', '${data.rows[0].description}', '{${data.rows[0].images}}', ${data.rows[0].postlikes}, ${data.rows[0].postcomments}, ${data.rows[0].postshare}, '${profilephoto}','${dateTime}');`, err => {
+                        client.query(`INSERT INTO posts (originalpostid,userId, userusername, originaluserid, originalUsername, description, images, postlikes, postcomments, postshare, profilephoto, datetime) VALUES (${originalpostid},${req.userId}, '${req.username}', ${data.rows[0].originaluserid}, '${data.rows[0].originalusername}', '${data.rows[0].description}', '{${data.rows[0].images}}', 0, 0, 0, '${profilephoto}','${dateTime}');`, err => {
                             if (err) {
                                 console.log(err);
                                 res.status(500).json({ message: "Internal Server Error" });
@@ -189,7 +189,7 @@ exports.sharePost = (req, res) => {
                                 where
                                 postid = ${postid} or postid = ${originalpostid}; 
                                 INSERT INTO shareposts
-                                VALUES (${postid},${req.userId});
+                                VALUES (${originalpostid},${req.userId});
                                 COMMIT;
                                 `, err => {
                                     if (err) {

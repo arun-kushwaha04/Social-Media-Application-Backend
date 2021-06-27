@@ -214,6 +214,8 @@ exports.verifyEmail = (req, res) => {
     const token = req.headers.authorization;
     jwt.verify(token, process.env.SECRET_KEY, (err, result) => {
         if (err) {
+            console.log('error here');
+            console.log(err);
             res.status(500).json({
                 message: "Internal Error Ocurred",
             })
@@ -224,7 +226,7 @@ exports.verifyEmail = (req, res) => {
                 const name = result.name;
                 client.query(`SELECT * FROM users WHERE email = '${email}';`, (err, data) => {
                     if (err) {
-                        console.log(err.message);
+                        console.log(err);
                         res.status(500).json({
                             message: "Internal server Error",
                         })
@@ -284,15 +286,15 @@ exports.resendVerificationLink = (req, res) => {
 
 exports.logout = (req, res) => {
     client.query(`UPDATE users SET isLoggedin = 0 WHERE email = '${req.email}';`)
-    .then((data)=>{
-        console.log("Logged Out succesfully");
-        res.status(200).json({
-            message:"Logged out succesfully",
+        .then((data) => {
+            console.log("Logged Out succesfully");
+            res.status(200).json({
+                message: "Logged out succesfully",
+            });
+        })
+        .catch((err) => {
+            res.status(500).json({
+                error: "Error Occured",
+            });
         });
-    })
-    .catch((err)=>{
-        res.status(500).json({
-            error:"Error Occured",
-        });
-    });
 }
