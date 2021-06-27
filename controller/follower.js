@@ -63,7 +63,7 @@ exports.getUserList = (req, res) => {
 }
 
 
-exports.getSuggestionList = function(req, res) {
+exports.getSuggestionList = (req, res) => {
     client.query(`SELECT id, username, profilephoto FROM users WHERE id NOT IN ( SELECT following FROM follower WHERE follower = ${req.userId}) AND NOT id = ${req.userId} ORDER BY likes DESC;`, (err, data) => {
         if (err) {
             console.log(err);
@@ -73,6 +73,35 @@ exports.getSuggestionList = function(req, res) {
             res.status(200).json({
                 message: 'Users Reterived Successfully',
                 users,
+            })
+        }
+    })
+}
+
+exports.addFollowing = (req, res) => {
+    const { following, followingrusername } = req.body;
+
+    client.query(`INSERT INTO follower VALUES (${req.userId},'${req.username}',${following},'${followingrusername}')`, err => {
+        if (err) {
+            console.log(err);
+            res.status(500).json({ message: "Internal Server Error" });
+        } else {
+            res.status(200).json({
+                message: `Followed ${followingrusername}`,
+            })
+        }
+    })
+}
+exports.removeFollowing = (req, res) => {
+    const { following, followingrusername } = req.body;
+
+    client.query(`DELETE FROM follower WHERE follower = ${req.userId} AND following = ${following}`, err => {
+        if (err) {
+            console.log(err);
+            res.status(500).json({ message: "Internal Server Error" });
+        } else {
+            res.status(200).json({
+                message: `Un-Followed ${followingrusername}`,
             })
         }
     })
