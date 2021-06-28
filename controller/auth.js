@@ -73,7 +73,7 @@ exports.signUp = (req, res) => {
 exports.login = (req, res) => {
     const { email, password } = req.body;
     //checking if a user already exist with given email id
-    client.query(`SELECT id, name ,username ,email, profilephoto, isloggedin ,isverified FROM users WHERE email = '${email}' OR username = '${email}';`, (err, data) => {
+    client.query(`SELECT id, name ,username ,email, profilephoto, isloggedin ,isverified,password FROM users WHERE email = '${email}' OR username = '${email}';`, (err, data) => {
         //if error occured
         if (err) {
             console.log(`Error occured in searching users\n ${err}`);
@@ -115,7 +115,7 @@ exports.login = (req, res) => {
                                 );
                                 client.query(`UPDATE users SET isLoggedin = 1 WHERE email = '${email}' OR username = '${email}';`, err => {
                                     if (err) {
-                                        console.log(`Error occured in comparing password\n ${err}`);
+                                        console.log(`Error occured \n ${err}`);
                                         res.status(500).json({ message: 'Internal Server Error Please Try Again', });
                                     }
                                     console.log('LOGGED IN SUCCESSFULLY');
