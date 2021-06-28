@@ -73,7 +73,7 @@ exports.signUp = (req, res) => {
 exports.login = (req, res) => {
     const { email, password } = req.body;
     //checking if a user already exist with given email id
-    client.query(`SELECT * FROM users WHERE email = '${email}' OR username = '${email}';`, (err, data) => {
+    client.query(`SELECT id, name ,username ,email, profilephoto, isloggedin ,isverified FROM users WHERE email = '${email}' OR username = '${email}';`, (err, data) => {
         //if error occured
         if (err) {
             console.log(`Error occured in searching users\n ${err}`);
@@ -140,7 +140,7 @@ exports.login = (req, res) => {
 exports.forgotPassword = (req, res) => {
     const { email } = req.body;
     //checking if a user already exist with given email id
-    client.query(`SELECT * FROM users WHERE email = '${email}'`, (err, data) => {
+    client.query(`SELECT  id, name ,username ,email FROM users WHERE email = '${email}'`, (err, data) => {
         //if error occured
         if (err) {
             console.log(`Error occured in searching users\n ${err}`);
@@ -174,7 +174,7 @@ exports.forgotPassword = (req, res) => {
 exports.resetPassword = (req, res) => {
     const password = req.body.password;
     //checking if a user already exist with given email id
-    client.query(`SELECT * FROM users WHERE email = '${req.email}'`, (err, data) => {
+    client.query(`SELECT id FROM users WHERE email = '${req.email}'`, (err, data) => {
         //if error occured
         if (err) {
             console.log(`Error occured in searching users\n ${err}`);
@@ -224,7 +224,7 @@ exports.verifyEmail = (req, res) => {
                 const username = result.username;
                 const email = result.email;
                 const name = result.name;
-                client.query(`SELECT * FROM users WHERE email = '${email}';`, (err, data) => {
+                client.query(`SELECT id, name ,username ,email FROM users WHERE email = '${email}';`, (err, data) => {
                     if (err) {
                         console.log(err);
                         res.status(500).json({
@@ -257,7 +257,7 @@ exports.verifyEmail = (req, res) => {
 //resending the verifcation email
 exports.resendVerificationLink = (req, res) => {
     const email = req.body.email;
-    client.query(`SELECT * FROM users WHERE email = '${email}';`, (err, data) => {
+    client.query(`SELECT id, name ,username ,email FROM users WHERE email = '${email}';`, (err, data) => {
         if (err) {
             console.log(err.message);
             res.status(500).json({

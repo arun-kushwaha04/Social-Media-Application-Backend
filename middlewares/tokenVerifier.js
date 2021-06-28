@@ -15,7 +15,7 @@ exports.verifyToken = (req, res, next) => {
                 const email = result.email;
                 const name = result.name;
                 const username = result.username;
-                client.query(`SELECT * FROM users WHERE email = '${email}';`, (err, data) => {
+                client.query(`SELECT id, name ,username ,email, profilephoto FROM users WHERE email = '${email}';`, (err, data) => {
                     if (err) {
                         console.log(err.message);
                         res.status(500).json({

@@ -49,14 +49,14 @@ exports.getFollower = (req, res) => {
 }
 
 exports.getUserList = (req, res) => {
-    client.query(`SELECT id, username, email, likes, profilephoto FROM users`, (err, users) => {
+    client.query(`SELECT id, username, email, name, profilephoto FROM users`, (err, users) => {
         if (err) {
             console.log(err);
             res.status(500).json({ message: 'Internal Server Error', });
         } else {
             res.status(200).json({
                 message: 'Users Reterived Successfully',
-                users,
+                users: users.rows,
             })
         }
     })
