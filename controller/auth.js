@@ -42,7 +42,7 @@ exports.signUp = (req, res) => {
                                 email: email,
                                 username: username,
                             },
-                            process.env.SECRET_KEY, { expiresIn: '5m' }
+                            process.env.SECRET_KEY, { expiresIn: '10m' }
                         );
                         //making a query at database to add the user.
                         const profilePhotoUrl = 'https://firebasestorage.googleapis.com/v0/b/dubify-7f0f8.appspot.com/o/Profile-Photos%2F51f6fb256629fc755b8870c801092942.png?alt=media&token=f67200e6-85c6-49a8-afe1-9ebd06a298c5';
@@ -157,7 +157,7 @@ exports.forgotPassword = (req, res) => {
                         name: data.rows[0].name,
                         email: email,
                     },
-                    process.env.SECRET_KEY, { expiresIn: '5m' }
+                    process.env.SECRET_KEY, { expiresIn: '10m' }
                 );
                 res.status(200).json({
                     message: 'Reset Password Has Been Email Sent',
@@ -217,7 +217,7 @@ exports.verifyEmail = (req, res) => {
             console.log('error here');
             console.log(err);
             res.status(500).json({
-                message: "Internal Error Ocurred",
+                message: "Token Expired",
             })
         } else {
             if (result) {
@@ -272,7 +272,7 @@ exports.resendVerificationLink = (req, res) => {
                     email: email,
                     username: username,
                 },
-                process.env.SECRET_KEY, { expiresIn: '5m' }
+                process.env.SECRET_KEY, { expiresIn: '10m' }
             );
             res.status(200).json({
                 message: `Verification Email Sent`,
