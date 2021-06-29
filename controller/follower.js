@@ -81,7 +81,12 @@ exports.getSuggestionList = (req, res) => {
 exports.addFollowing = (req, res) => {
     const { following, followingrusername } = req.body;
 
-    client.query(`INSERT INTO follower VALUES (${req.userId},'${req.username}',${following},'${followingrusername}')`, err => {
+    client.query(`BEGIN TRANSACTION;
+    INSERT INTO follower VALUES (${req.userId},'${req.username}',${following},'${followingrusername}');
+    UPDATE users SET followingcount = users.followingcount + 1 WHERE id = ${req.userId};
+    UPDATE users SET followercount = users.followercount + 1 WHERE id = ${following};
+    COMMIT;
+    `, err => {
         if (err) {
             console.log(err);
             res.status(500).json({ message: "Internal Server Error" });
@@ -95,7 +100,12 @@ exports.addFollowing = (req, res) => {
 exports.removeFollowing = (req, res) => {
     const { following, followingrusername } = req.body;
 
-    client.query(`DELETE FROM follower WHERE follower = ${req.userId} AND following = ${following}`, err => {
+    client.query(`BEGIN TRANSACTION;
+    DELETE FROM follower WHERE follower = ${req.userId} AND following = ${following};
+    UPDATE users SET followingcount = users.followingcount - 1 WHERE id = ${req.userId};
+    UPDATE users SET followercount = users.followercount - 1 WHERE id = ${following};    
+    COMMIT;
+    `, err => {
         if (err) {
             console.log(err);
             res.status(500).json({ message: "Internal Server Error" });
