@@ -2,30 +2,30 @@ const client = require('../configs/db');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
-exports.userData = (req, res) => {
-    let Email = "";
-    let flag = 0;
-    for (let i = 0; i < req.email.length; i++) {
-        if (i < 2) Email += req.email[i];
-        else if (req.email[i] === '@') {
-            Email += req.email[i];
-            flag = 1;
-        } else if (flag === 1) Email += req.email[i];
-        else Email += '*';
-    }
-    res.status(200).json({
-        message: "User Data Reterived Successfully",
-        name: req.name,
-        email: Email,
-    });
-}
+// exports.userData = (req, res) => {
+//     let Email = "";
+//     let flag = 0;
+//     for (let i = 0; i < req.email.length; i++) {
+//         if (i < 2) Email += req.email[i];
+//         else if (req.email[i] === '@') {
+//             Email += req.email[i];
+//             flag = 1;
+//         } else if (flag === 1) Email += req.email[i];
+//         else Email += '*';
+//     }
+//     res.status(200).json({
+//         message: "User Data Reterived Successfully",
+//         name: req.name,
+//         email: Email,
+//     });
+// }
 
 exports.userInfo = (req, res) => {
     client.query(`SELECT * FROM users WHERE email = '${req.email}';`)
     .then((data)=>{
         console.log(data.rows[0]);
         const userData = {
-            email : req.body.email,
+            email : data.rows[0].email,
             name : data.rows[0].name,
             photo: data.rows[0].profilephoto,
             likes: data.rows[0].likes,
