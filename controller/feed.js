@@ -227,7 +227,7 @@ exports.commentPost = (req, res) => {
     BEGIN TRANSACTION;
         UPDATE users SET comments = users.comments + 1 WHERE id = ${req.userId} or id = ${originaluserid};
         UPDATE posts SET postcomments = posts.postcomments + 1 WHERE postid = ${postid} or postid = ${originalpostid};
-        INSERT INTO comment (postid, originalpostid, userid, username, comment, datetime, profilephoto) VALUES (${postid}, ${originalpostid},${req.userId},'${req.username}','${comment}','${dateTime}','${profilePhoto}');
+        INSERT INTO comment (postid, originalpostid, userid,  comment, datetime) VALUES (${postid}, ${originalpostid},${req.userId},'${comment}','${dateTime}');
     COMMIT;
             `, err => {
         if (err) {
@@ -245,7 +245,7 @@ exports.commentPost = (req, res) => {
 //getting the comment on a post
 exports.getAllPostComment = (req, res) => {
     const { postid, originalpostid } = req.body;
-    client.query(`SELECT * FROM comment WHERE postId = ${postid} or postid = ${originalpostid} or originalpostid = ${postid} or originalpostid = ${originalpostid};`, (err, data) => {
+    client.query(`SELECT userid,comment,users.username,users.profilephoto FROM comment INNER JOIN users ON userid = users.id WHERE postId = ${postid} or postid = ${originalpostid} or originalpostid = ${postid} or originalpostid = ${originalpostid};`, (err, data) => {
         if (err) {
             console.log(err);
             res.status(500).json({ message: "Internal Server Error" });
