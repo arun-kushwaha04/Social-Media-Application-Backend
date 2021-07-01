@@ -2,7 +2,7 @@ const client = require('../configs/db');
 
 //Adding the post of the user
 exports.addPost = (req, res) => {
-    const { description, image, profilePhoto, dateTime } = req.body;
+    const { description, image, profilePhoto, dateTime, imageRef } = req.body;
     console.log(image);
     const images = image;
     client.query(`BEGIN TRANSACTION;
@@ -23,7 +23,7 @@ exports.addPost = (req, res) => {
 
 //getting user post
 exports.getUserPost = (req, res) => {
-    client.query(`SELECT * FROM posts WHERE userid = ${req.userId} ORDER BY postid DESC;`, (err, data) => {
+    client.query(`SELECT postid,originalpostid,userid,originaluserid,description,images,postlikes,postcomments,postshare,datetime,username,profilephoto FROM posts inner join users on id = userid  WHERE userid = ${req.userId} ORDER BY postid DESC;`, (err, data) => {
         if (err) {
             console.log(err);
             res.status(500).json({ message: "Internal Server Error" });
@@ -56,8 +56,8 @@ exports.deleteUserPost = (req, res) => {
     const { postId } = req.body;
     client.query(`
     BEGIN TRANSACTION;
-    DELETE FROM posts WHERE postid = ${postId} and userId = ${req.userId};
-    UPDATE users SET postcount = users.postcount-1 WHERE userid = ${userid};
+    DELETE FROM posts WHERE postid = ${postId} and userid = ${req.userId};
+    UPDATE users SET postcount = users.postcount-1 WHERE id = ${userid};
     COMMIT;
     `, (err, data) => {
         if (err) {
@@ -81,7 +81,12 @@ exports.deleteUserPost = (req, res) => {
 
 //get the post of following user
 exports.getFollowingPosts = (req, res) => {
-    client.query(`SELECT * FROM posts INNER JOIN follower ON posts.userid = follower.following AND follower.follower = ${req.userId} ORDER BY postid DESC;`, (err, data) => {
+    client.query(`SELECT 
+    posts.postid,posts.originalpostid,posts.userid,posts.originaluserid,posts.description,posts.images,posts.postlikes,posts.postcomments,posts.postshare,posts.datetime,t1.username,t1.profilephoto,t2.originalusername
+    FROM posts INNER JOIN follower ON posts.userid = follower.following AND follower.follower = ${req.userId}
+    JOIN users t1 on t1.id = ${req.userId}
+    JOIN users t2 on posts.originaluserid = t2.id
+    ORDER BY postid DESC;`, (err, data) => {
         if (err) {
             console.log(err);
             res.status(500).json({ message: "Internal Server Error" });
@@ -93,6 +98,8 @@ exports.getFollowingPosts = (req, res) => {
         }
     })
 }
+
+// SELECT * FROM posts INNER JOIN follower ON posts.userid = follower.following AND follower.follower = 2 JOIN users on ​posts.userid = users.id ORDER BY postid DESC;
 
 //update like on a post
 exports.updateLike = (req, res) => {
