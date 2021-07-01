@@ -6,7 +6,7 @@ exports.addPost = (req, res) => {
     console.log(image);
     const images = image;
     client.query(`BEGIN TRANSACTION;
-    INSERT INTO posts (userId, userusername, originalUserId, originalUsername, description, images, postlikes, postcomments, postshare, profilephoto,datetime) VALUES (${req.userId}, '${req.username}', ${req.userId}, '${req.username}', '${description}', '{${images}}', 0, 0, 0, '${profilePhoto}','${dateTime}');
+    INSERT INTO posts (userId, originalUserId, description, images, postlikes, postcomments, postshare, datetime) VALUES (${req.userId}, ${req.userId},'${description}', '{${images}}', 0, 0, 0, '${dateTime}');
     UPDATE users SET postmade = users.postmade + 1 WHERE id = ${req.userId};
     COMMIT;
     `, err => {
@@ -84,7 +84,7 @@ exports.getFollowingPosts = (req, res) => {
     client.query(`SELECT 
     posts.postid,posts.originalpostid,posts.userid,posts.originaluserid,posts.description,posts.images,posts.postlikes,posts.postcomments,posts.postshare,posts.datetime,t1.username,t1.profilephoto,t2.originalusername
     FROM posts INNER JOIN follower ON posts.userid = follower.following AND follower.follower = ${req.userId}
-    JOIN users t1 on t1.id = ${req.userId}
+    JOIN users t1 on t1.id = posts.userid
     JOIN users t2 on posts.originaluserid = t2.id
     ORDER BY postid DESC;`, (err, data) => {
         if (err) {
@@ -181,7 +181,7 @@ exports.sharePost = (req, res) => {
                         console.log(err);
                         res.status(500).json({ message: "Internal Server Error" });
                     } else {
-                        client.query(`INSERT INTO posts (originalpostid,userId, userusername, originaluserid, originalUsername, description, images, postlikes, postcomments, postshare, profilephoto, datetime) VALUES (${originalpostid},${req.userId}, '${req.username}', ${data.rows[0].originaluserid}, '${data.rows[0].originalusername}', '${data.rows[0].description}', '{${data.rows[0].images}}', 0, 0, 0, '${profilephoto}','${dateTime}');`, err => {
+                        client.query(`INSERT INTO posts (originalpostid,userId, originaluserid,  description, images, postlikes, postcomments, postshare, datetime) VALUES (${originalpostid},${req.userId},  ${data.rows[0].originaluserid},  '${data.rows[0].description}', '{${data.rows[0].images}}', 0, 0, 0, '${dateTime}');`, err => {
                             if (err) {
                                 console.log(err);
                                 res.status(500).json({ message: "Internal Server Error" });
