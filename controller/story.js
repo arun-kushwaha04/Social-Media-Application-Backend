@@ -1,14 +1,34 @@
 const client = require('../configs/db');
 
-exports.addStory = (req, res) => {
-    const images = req.body.images;
-    client.query(`INSERT INRO story (userid,images,likes) VALUES (${req.userId},'{${images}}',0)`, err => {
+exports.getStoryList = (req, res) => {
+    client.query(`SELECT 
+    t1.id,story.storyid,story.images,story.likes,t1.username,t1.profilephoto
+    FROM story INNER JOIN follower ON story.userid = follower.following AND follower.follower = ${req.userId}
+    JOIN users t1 on t1.id = story.userid
+    WHERE created_at >= NOW() - INTERVAL '24 HOURS'
+    ORDER BY story.storyid DESC; `, (err, data) => {
         if (err) {
             console.log(err);
             res.status(500).json({ message: 'Internal Server Error' });
         } else {
             res.status(200).json({
-                message: 'Story Uplaoaded Successfully'
+                message: 'Sotry of following Reterived Successfully',
+                story: data.rows,
+            })
+        }
+    })
+}
+
+
+exports.addStory = (req, res) => {
+    const images = req.body.storyImageUrl;
+    client.query(`INSERT INTO story (userid,images,likes) VALUES (${req.userId},'{${images}}',0)`, err => {
+        if (err) {
+            console.log(err);
+            res.status(500).json({ message: 'Internal Server Error' });
+        } else {
+            res.status(200).json({
+                message: 'Story Uploaded Successfully'
             })
         }
     })
@@ -20,16 +40,22 @@ exports.getUserStory = (req, res) => {
     story.storyid,story.images,story.likes,t1.username,t1.profilephoto
     FROM story 
     JOIN users t1 on t1.id = story.userid
-    WHERE userid = ${userId} AND created_at < NOW() - '1 DAY'
-    ORDER BY story.userid DESC; `, (err, data) => {
+    WHERE userid = ${userId} AND created_at >= NOW() - INTERVAL '24 HOURS'
+    `, (err, data) => {
         if (err) {
             console.log(err);
             res.status(500).json({ message: 'Internal Server Error' });
         } else {
-            res.status(200).json({
-                message: 'Sotry of following Reterived Successfully',
-                story: data.rows,
-            })
+            if (data.rowCount === 0) {
+                res.status(200).json({
+                    message: 'No Story Found',
+                })
+            } else {
+                res.status(200).json({
+                    message: 'Sotry of following Reterived Successfully',
+                    story: data.rows[0].images,
+                })
+            }
         }
     })
 }
