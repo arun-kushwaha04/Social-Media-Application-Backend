@@ -62,8 +62,7 @@ exports.getUserStory = (req, res) => {
 }
 
 exports.isImageLiked = (req, res) => {
-    const { userId, imageId } = req.body;
-    const image = userId + imageId
+    const { image } = req.body;
     client.query(`SELECT * FROM likeonstory WHERE image = '${image}' AND userid = ${req.userId};`, (err, data) => {
         if (err) {
             console.log(err);
@@ -79,8 +78,8 @@ exports.isImageLiked = (req, res) => {
 }
 
 exports.updateLikeStory = (req, res) => {
-    const { storyId, imageId } = req.body;
-    const image = storyId + imageId
+    console.log(req.body);
+    const { storyId, image } = req.body;
     let value;
     let message;
     let query;
