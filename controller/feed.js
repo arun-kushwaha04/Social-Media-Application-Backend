@@ -245,7 +245,7 @@ exports.commentPost = (req, res) => {
 //getting the comment on a post
 exports.getAllPostComment = (req, res) => {
     const { postid, originalpostid } = req.body;
-    client.query(`SELECT userid,comment,users.username,users.profilephoto FROM comment INNER JOIN users ON userid = users.id WHERE postId = ${postid} or postid = ${originalpostid} or originalpostid = ${postid} or originalpostid = ${originalpostid};`, (err, data) => {
+    client.query(`SELECT userid,comment,users.username,users.profilephoto,datetime FROM comment INNER JOIN users ON userid = users.id WHERE postId = ${postid} or postid = ${originalpostid} or originalpostid = ${postid} or originalpostid = ${originalpostid};`, (err, data) => {
         if (err) {
             console.log(err);
             res.status(500).json({ message: "Internal Server Error" });
