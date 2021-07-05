@@ -23,7 +23,7 @@ exports.addPost = (req, res) => {
 
 //getting user post
 exports.getUserPost = (req, res) => {
-    client.query(`SELECT postid,originalpostid,userid,originaluserid,description,images,postlikes,postcomments,postshare,datetime,username,profilephoto FROM posts inner join users on id = userid  WHERE userid = ${req.userId} ORDER BY postid DESC;`, (err, data) => {
+    client.query(`SELECT postid,originalpostid,userid,originaluserid,description,images,postlikes,postcomments,postshare,datetime,username,profilephoto FROM posts inner join users on id = userid  WHERE originaluserid = ${req.userId} ORDER BY postid DESC;`, (err, data) => {
         if (err) {
             console.log(err);
             res.status(500).json({ message: "Internal Server Error" });
@@ -38,8 +38,8 @@ exports.getUserPost = (req, res) => {
 
 //edit the user post
 exports.editUserPost = (req, res) => {
-    const { postid, description, image } = req.body;
-    client.query(`UPDATE posts SET description = ${description} image = ${image} WHERE postid = ${postid};`, err => {
+    const { postId, description, image } = req.body;
+    client.query(`UPDATE posts SET description = '${description}', images = '{${image}}' WHERE postid = ${postId};`, err => {
         if (err) {
             console.log(err);
             res.status(500).json({ message: "Internal Server Error" });
@@ -275,15 +275,30 @@ exports.getFollower = (req, res) => {
 
 //a user post count
 exports.getPost = (req, res) => {
-    client.query(`SELECT * FROM users WHERE username = '${req.user.username}';`, (err, data) => {
+    client.query(`SELECT postmade FROM users WHERE username = '${req.username}';`, (err, data) => {
         if (err) {
             console.log(err);
             res.status(500).json({ message: "Internal Server Error" });
         } else {
             res.status(200).json({
                 message: "Post count returned successfully",
-                postCount: data.rows[0].postcount,
+                postCount: data.rows[0].postmade,
             })
         }
     })
+}
+
+//get a post by postId
+exports.getPostById = (req, res) => {
+    client.query(`SELECT postid,originalpostid,userid,originaluserid,description,images,postlikes,postcomments,postshare,datetime,username,profilephoto FROM posts inner join users on id = userid  WHERE postid = ${req.body.postid}`, (err, data) => {
+        if (err) {
+            console.log(err);
+            res.status(500).json({ message: "Internal Server Error" });
+        } else {
+            res.status(200).json({
+                message: "Posts Reterived Successfully",
+                post: data.rows[0],
+            });
+        }
+    });
 }

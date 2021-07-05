@@ -21,18 +21,17 @@ const jwt = require('jsonwebtoken');
 // }
 
 exports.userInfo = (req, res) => {
-    client.query(`SELECT * FROM users WHERE email = '${req.email}';`)
+    client.query(`SELECT * FROM users WHERE username = '${req.body.username}';`)
         .then((data) => {
-            console.log(data.rows[0]);
             const userData = {
                 email: req.email,
                 name: data.rows[0].name,
-                photo: data.rows[0].profilephoto,
                 likes: data.rows[0].likes,
                 followers: data.rows[0].followercount,
                 posts: data.rows[0].postmade,
                 following: data.rows[0].followingcount,
                 about: data.rows[0].about,
+                profilePhoto: data.rows[0].profilephoto,
             }
             res.status(200).json({
                 message: "Fetched succesfully",
