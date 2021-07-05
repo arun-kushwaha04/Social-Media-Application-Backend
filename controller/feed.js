@@ -23,7 +23,10 @@ exports.addPost = (req, res) => {
 
 //getting user post
 exports.getUserPost = (req, res) => {
-    client.query(`SELECT postid,originalpostid,userid,originaluserid,description,images,postlikes,postcomments,postshare,datetime,username,profilephoto FROM posts inner join users on id = userid  WHERE originaluserid = ${req.userId} ORDER BY postid DESC;`, (err, data) => {
+    client.query(`SELECT postid,originalpostid,userid,originaluserid,description,images,postlikes,postcomments,postshare,datetime,t1.username,t1.profilephoto,t2.originalusername 
+    FROM posts inner join users t1 on t1.id = userid 
+    JOIN users t2 on posts.originaluserid = t2.id 
+    WHERE t1.username = '${req.body.username}' ORDER BY postid DESC;`, (err, data) => {
         if (err) {
             console.log(err);
             res.status(500).json({ message: "Internal Server Error" });
@@ -55,10 +58,7 @@ exports.editUserPost = (req, res) => {
 exports.deleteUserPost = (req, res) => {
     const { postId } = req.body;
     client.query(`
-    BEGIN TRANSACTION;
     DELETE FROM posts WHERE postid = ${postId} and userid = ${req.userId};
-    UPDATE users SET postcount = users.postcount-1 WHERE id = ${userid};
-    COMMIT;
     `, (err, data) => {
         if (err) {
             console.log(err);
@@ -70,7 +70,7 @@ exports.deleteUserPost = (req, res) => {
                 });
             }
             if (data.rowCount === 0) {
-                res.status(400).json({
+                res.status(200).json({
                     message: "Your Not Authoriized To Delete This Post",
                 });
             }

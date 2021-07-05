@@ -21,30 +21,19 @@ const jwt = require('jsonwebtoken');
 // }
 
 exports.userInfo = (req, res) => {
-    client.query(`SELECT * FROM users WHERE username = '${req.body.username}';`)
-        .then((data) => {
-            const userData = {
-                email: req.email,
-                name: data.rows[0].name,
-                likes: data.rows[0].likes,
-                followers: data.rows[0].followercount,
-                posts: data.rows[0].postmade,
-                following: data.rows[0].followingcount,
-                about: data.rows[0].about,
-                profilePhoto: data.rows[0].profilephoto,
-            }
+    client.query(`SELECT email,name,likes,followercount,postmade,followingcount,about,profilephoto FROM users WHERE username = '${req.body.username}';`, (err, data) => {
+        if (err) {
+            console.log(err);
+            res.status(500).json({ message: "Internal Server Error" });
+        } else {
             res.status(200).json({
                 message: "Fetched succesfully",
-                userData: userData,
+                userData: data.rows[0],
             });
-        })
-        .catch((err) => {
-            console.log(err);
-            res.status(500).json({
-                error: "Fetching Error",
-            });
-        });
+        }
+    })
 }
+
 
 exports.updateEmail = (req, res) => {
     const userEmail = req.body.email;
