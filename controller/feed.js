@@ -68,13 +68,11 @@ exports.deleteUserPost = (req, res) => {
                 res.status(200).json({
                     message: "Post Deleted",
                 });
-            }
-            if (data.rowCount >= 1) {
+            } else if (data.rowCount >= 1) {
                 res.status(200).json({
                     message: "Post And All Shared Links Deleted",
                 });
-            }
-            if (data.rowCount === 0) {
+            } else if (data.rowCount === 0) {
                 res.status(200).json({
                     message: "Your Not Authoriized To Delete This Post",
                 });

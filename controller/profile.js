@@ -35,60 +35,6 @@ exports.userInfo = (req, res) => {
 }
 
 
-exports.updateEmail = (req, res) => {
-    const userEmail = req.body.email;
-    const userPassword = req.body.password;
-
-    client.query(`SELECT * FROM users WHERE email = '${userEmail}'`, (err, data) => {
-        if (err) {
-            res.status(500).json({ message: "Internal Server Error", });
-        } else {
-            if (data.rows.length != 0) {
-                res.status(400).json({ message: "Email Already Exists", });
-            }
-        }
-    })
-
-    client.query(`SELECT * FROM users WHERE email = '${req.email}'`, (err, data) => {
-        if (err) {
-            res.status(500).json({ message: "Internal Server Error", });
-        } else {
-            const hashPassword = data.rows[0].password;
-            bcrypt.compare(userPassword, hashPassword, (err, result) => {
-                if (err) {
-                    console.log(err);
-                    res.status(500).json({ message: "Internal Server Error", });
-                } else {
-                    if (!result) {
-                        console.log("Incorrect Pass");
-                        res.status(400).json({ message: "Invalid Password", });
-                    } else {
-                        client.query(`UPDATE users SET email='${userEmail}' WHERE email='${req.email}'`, err => {
-                            if (err) {
-                                console.log(err);
-                                res.status(500).json({ message: "Internal Server Error", });
-                            } else {
-                                req.email = userEmail;
-                                const token = jwt.sign({
-                                        userId: req.userId,
-                                        name: req.name,
-                                        email: req.body.email,
-                                    },
-                                    process.env.SECRET_KEY,
-                                );
-                                res.status(200).json({
-                                    message: "Email Updated successfully",
-                                    userToken: token,
-                                });
-                            }
-                        })
-                    }
-                }
-            });
-        }
-    })
-}
-
 exports.updateName = (req, res) => {
     const userName = req.body.name;
     const userPassword = req.body.password;
@@ -108,13 +54,13 @@ exports.updateName = (req, res) => {
                             if (err) {
                                 res.status(500).json({ message: "Internal Server Error", });
                             } else {
-                                req.name = userName;
                                 const token = jwt.sign({
                                         userId: req.userId,
                                         name: userName,
+                                        username: req.username,
                                         email: req.email,
                                     },
-                                    process.env.SECRET_KEY,
+                                    process.env.SECRET_KEY, { expiresIn: '30d' }
                                 );
                                 res.status(200).json({
                                     message: "Name Updated successfully",
@@ -132,7 +78,7 @@ exports.updateName = (req, res) => {
 exports.updatePassword = (req, res) => {
     const userNewPassword = req.body.newPassword;
     const userPassword = req.body.password;
-    client.query(`SELECT * FROM users WHERE email = '${req.email}'`, (err, data) => {
+    client.query(`SELECT * FROM users WHERE id = '${req.userId}'`, (err, data) => {
         if (err) {
             res.status(500).json({ message: "Internal Server Error", });
         } else {
@@ -149,7 +95,7 @@ exports.updatePassword = (req, res) => {
                                 console.log(`Error occured in hashing password\n ${err}`);
                                 res.status(500).json({ message: 'Internal Server Error Please Try Again', });
                             } else {
-                                client.query(`UPDATE users SET password='${hash}' WHERE email='${req.email}'`, err => {
+                                client.query(`UPDATE users SET password='${hash}' WHERE id='${req.userId}'`, err => {
                                     if (err) {
                                         res.status(500).json({ message: "Internal Server Error", });
                                     } else {
@@ -162,6 +108,18 @@ exports.updatePassword = (req, res) => {
                         });
                     }
                 }
+            });
+        }
+    })
+}
+exports.updateProfilePhoto = (req, res) => {
+    const profilePhoto = req.body.profilePhoto;
+    client.query(`UPDATE users SET profilephoto='${profilePhoto}' WHERE id='${req.userId}'`, err => {
+        if (err) {
+            res.status(500).json({ message: "Internal Server Error", });
+        } else {
+            res.status(200).json({
+                message: "Photo Updated",
             });
         }
     })

@@ -120,3 +120,22 @@ exports.removeFollowing = (req, res) => {
         }
     })
 }
+
+exports.isUserFollowing = (req, res) => {
+    const { username } = req.body;
+
+    client.query(`
+    SELECT t1.username from follower INNER JOIN users t1 on following = t1.id WHERE follower = ${req.userId} and t1.username = '${username}'
+    `, (err, data) => {
+        if (err) {
+            console.log(err);
+            res.status(500).json({ message: "Internal Server Error" });
+        } else {
+            let value = 1;
+            if (data.rowCount === 0) value = 0;
+            res.status(200).json({
+                value,
+            })
+        }
+    })
+}
