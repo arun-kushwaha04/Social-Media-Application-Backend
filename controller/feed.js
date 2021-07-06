@@ -58,7 +58,7 @@ exports.editUserPost = (req, res) => {
 exports.deleteUserPost = (req, res) => {
     const { postId } = req.body;
     client.query(`
-    DELETE FROM posts WHERE postid = ${postId} and userid = ${req.userId};
+    DELETE FROM posts WHERE postid = ${postId} or originalpostid = ${postId};
     `, (err, data) => {
         if (err) {
             console.log(err);
@@ -67,6 +67,11 @@ exports.deleteUserPost = (req, res) => {
             if (data.rowCount === 1) {
                 res.status(200).json({
                     message: "Post Deleted",
+                });
+            }
+            if (data.rowCount >= 1) {
+                res.status(200).json({
+                    message: "Post And All Shared Links Deleted",
                 });
             }
             if (data.rowCount === 0) {
@@ -221,8 +226,7 @@ exports.sharePost = (req, res) => {
 
 //making comment on the post of the user
 exports.commentPost = (req, res) => {
-    const { postid, comment, originaluserid, dateTime, profilePhoto, originalpostid } = req.body;
-    console.log(req.body);
+    const { postid, comment, originaluserid, dateTime, originalpostid } = req.body;
     client.query(`
     BEGIN TRANSACTION;
         UPDATE users SET comments = users.comments + 1 WHERE id = ${req.userId} or id = ${originaluserid};
