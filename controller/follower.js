@@ -53,7 +53,7 @@ exports.getFollower = (req, res) => {
 }
 
 exports.getUserList = (req, res) => {
-    client.query(`SELECT id, username, email, name, profilephoto FROM users`, (err, users) => {
+    client.query(`SELECT id, username, email, name, profilephoto FROM users ORDER BY likes DESC;`, (err, users) => {
         if (err) {
             console.log(err);
             res.status(500).json({ message: 'Internal Server Error', });
