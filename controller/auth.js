@@ -111,7 +111,7 @@ exports.login = (req, res) => {
                                         username: data.rows[0].username,
                                         email: data.rows[0].email,
                                     },
-                                    process.env.SECRET_KEY, { expiresIn: '10s' }
+                                    process.env.SECRET_KEY, { expiresIn: '30s' }
                                 );
                                 client.query(`UPDATE users SET isLoggedin = 1 WHERE email = '${email}' OR username = '${email}';`, err => {
                                     if (err) {
