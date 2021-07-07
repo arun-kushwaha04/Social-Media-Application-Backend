@@ -5,6 +5,7 @@ const client = require('../configs/db');
 //creating a sign up method 
 exports.signUp = (req, res) => {
     const { username, name, email, password } = req.body;
+    console.log(req.body);
     //checking if a user already exist with given email id
     client.query(`SELECT * FROM users WHERE email = '${email}' OR username = '${username}'`, (err, data) => {
         //if error occured
@@ -17,12 +18,12 @@ exports.signUp = (req, res) => {
             const userExists = data.rows.length;
             if (userExists === 2) {
                 if (data.rows[0].username === username || data.rows[1].username === username) {
-                    res.status(400).json({ message: 'Username already In Use.' });
+                    res.status(400).json({ message: 'Username already In Use' });
                 }
             }
             if (userExists == 1) {
                 if (data.rows[0].username === username) {
-                    res.status(400).json({ message: 'Username already In Use.' });
+                    res.status(400).json({ message: 'Username already In Use' });
                 }
             }
             if (userExists !== 0) {
@@ -111,7 +112,7 @@ exports.login = (req, res) => {
                                         username: data.rows[0].username,
                                         email: data.rows[0].email,
                                     },
-                                    process.env.SECRET_KEY, { expiresIn: '30s' }
+                                    process.env.SECRET_KEY, { expiresIn: '30d' }
                                 );
                                 client.query(`UPDATE users SET isLoggedin = 1 WHERE email = '${email}' OR username = '${email}';`, err => {
                                     if (err) {
@@ -140,7 +141,7 @@ exports.login = (req, res) => {
 exports.forgotPassword = (req, res) => {
     const { email } = req.body;
     //checking if a user already exist with given email id
-    client.query(`SELECT  id, name ,username ,email FROM users WHERE email = '${email}'`, (err, data) => {
+    client.query(`SELECT  id, name ,username ,email FROM users WHERE email = '${email}' or username = '${email}'`, (err, data) => {
         //if error occured
         if (err) {
             console.log(`Error occured in searching users\n ${err}`);
@@ -155,12 +156,15 @@ exports.forgotPassword = (req, res) => {
                 const token = jwt.sign({
                         userId: data.rows[0].id,
                         name: data.rows[0].name,
-                        email: email,
+                        username: data.rows[0].username,
+                        email: data.rows[0].email,
                     },
                     process.env.SECRET_KEY, { expiresIn: '10m' }
                 );
+                console.log('data send');
                 res.status(200).json({
                     message: 'Reset Password Has Been Email Sent',
+                    email: data.rows[0].email,
                     userToken: token,
                     domain: process.env.DOMAIN,
                     key: process.env.KEY,
@@ -268,9 +272,10 @@ exports.resendVerificationLink = (req, res) => {
             const name = data.rows[0].name;
             const username = data.rows[0].username;
             const token = jwt.sign({
-                    name: name,
-                    email: email,
-                    username: username,
+                    userId: data.rows[0].id,
+                    name: data.rows[0].name,
+                    username: data.rows[0].username,
+                    email: data.rows[0].email,
                 },
                 process.env.SECRET_KEY, { expiresIn: '10m' }
             );

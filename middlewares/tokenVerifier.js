@@ -3,7 +3,6 @@ const client = require('../configs/db');
 
 exports.verifyToken = (req, res, next) => {
     const token = req.headers.authorization;
-    console.log('request made');
     jwt.verify(token, process.env.SECRET_KEY, (err, result) => {
         if (err) {
             if (err.name === 'TokenExpiredError') {
