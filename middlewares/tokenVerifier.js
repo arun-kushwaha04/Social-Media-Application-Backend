@@ -3,12 +3,21 @@ const client = require('../configs/db');
 
 exports.verifyToken = (req, res, next) => {
     const token = req.headers.authorization;
+    console.log('request made');
     jwt.verify(token, process.env.SECRET_KEY, (err, result) => {
         if (err) {
+            if (err.name === 'TokenExpiredError') {
+                const payload = jwt.verify(token, process.env.SECRET_KEY, { ignoreExpiration: true });
+                client.query(`UPDATE users SET isLoggedin = 0 WHERE id = ${payload.userId};`)
+                res.status(200).json({
+                    message: "Token Expired",
+                })
+            } else {
+                res.status(400).json({
+                    message: "Internal Server Error",
+                })
+            }
             console.log('here invalid token');
-            res.status(400).json({
-                message: "Token Expired",
-            })
         } else {
             if (result) {
                 const userId = result.userId;
