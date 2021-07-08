@@ -103,7 +103,7 @@ exports.addFollowing = (req, res) => {
 }
 exports.removeFollowing = (req, res) => {
     const { following, followingrusername } = req.body;
-
+    console.log(req.body);
     client.query(`BEGIN TRANSACTION;
     DELETE FROM follower WHERE follower = ${req.userId} AND following = ${following};
     UPDATE users SET followingcount = users.followingcount - 1 WHERE id = ${req.userId};
