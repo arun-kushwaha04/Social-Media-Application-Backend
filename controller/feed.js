@@ -229,7 +229,7 @@ exports.commentPost = (req, res) => {
     BEGIN TRANSACTION;
         UPDATE users SET comments = users.comments + 1 WHERE id = ${req.userId} or id = ${originaluserid};
         UPDATE posts SET postcomments = posts.postcomments + 1 WHERE postid = ${postid} or postid = ${originalpostid};
-        INSERT INTO comment (postid, originalpostid, userid,  comment, datetime) VALUES (${postid}, ${originalpostid},${req.userId},'${comment}','${dateTime}');
+        INSERT INTO comment (postid, originalpostid, userid,  comment, datetime) VALUES (${postid}, ${originalpostid},${req.userId},$$${comment}$$,'${dateTime}');
     COMMIT;
             `, err => {
         if (err) {
