@@ -84,7 +84,7 @@ exports.getSuggestionList = (req, res) => {
 
 exports.addFollowing = (req, res) => {
     const { following, followingrusername } = req.body;
-
+    console.log(req.body);
     client.query(`BEGIN TRANSACTION;
     INSERT INTO follower VALUES (${req.userId},${following});
     UPDATE users SET followingcount = users.followingcount + 1 WHERE id = ${req.userId};
