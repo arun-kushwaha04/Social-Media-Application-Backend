@@ -6,7 +6,7 @@ exports.addPost = (req, res) => {
     console.log(image);
     const images = image;
     client.query(`BEGIN TRANSACTION;
-    INSERT INTO posts (userId, originalUserId, description, images, postlikes, postcomments, postshare, datetime) VALUES (${req.userId}, ${req.userId},'${description}', '{${images}}', 0, 0, 0, '${dateTime}');
+    INSERT INTO posts (userId, originalUserId, description, images, postlikes, postcomments, postshare, datetime) VALUES (${req.userId}, ${req.userId},$$${description}$$, '{${images}}', 0, 0, 0, '${dateTime}');
     UPDATE users SET postmade = users.postmade + 1 WHERE id = ${req.userId};
     COMMIT;
     `, err => {
@@ -42,7 +42,7 @@ exports.getUserPost = (req, res) => {
 //edit the user post
 exports.editUserPost = (req, res) => {
     const { postId, description, image } = req.body;
-    client.query(`UPDATE posts SET description = '${description}', images = '{${image}}' WHERE postid = ${postId};`, err => {
+    client.query(`UPDATE posts SET description = $$${description}$$, images = '{${image}}' WHERE postid = ${postId};`, err => {
         if (err) {
             console.log(err);
             res.status(500).json({ message: "Internal Server Error" });
@@ -184,7 +184,7 @@ exports.sharePost = (req, res) => {
                         console.log(err);
                         res.status(500).json({ message: "Internal Server Error" });
                     } else {
-                        client.query(`INSERT INTO posts (originalpostid,userId, originaluserid,  description, images, postlikes, postcomments, postshare, datetime) VALUES (${originalpostid},${req.userId},  ${data.rows[0].originaluserid},  '${data.rows[0].description}', '{${data.rows[0].images}}', 0, 0, 0, '${dateTime}');`, err => {
+                        client.query(`INSERT INTO posts (originalpostid,userId, originaluserid,  description, images, postlikes, postcomments, postshare, datetime) VALUES (${originalpostid},${req.userId},  ${data.rows[0].originaluserid},  $$${data.rows[0].description}$$, '{${data.rows[0].images}}', 0, 0, 0, '${dateTime}');`, err => {
                             if (err) {
                                 console.log(err);
                                 res.status(500).json({ message: "Internal Server Error" });
