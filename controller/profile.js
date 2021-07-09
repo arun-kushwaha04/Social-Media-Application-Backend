@@ -21,11 +21,14 @@ const jwt = require('jsonwebtoken');
 // }
 
 exports.userInfo = (req, res) => {
-    client.query(`SELECT email,name,likes,followercount,postmade,followingcount,about,profilephoto FROM users WHERE username = '${req.body.username}';`, (err, data) => {
+    client.query(`SELECT id,email,name,likes,followercount,postmade,followingcount,about,profilephoto FROM users WHERE username = '${req.body.username}';`, (err, data) => {
         if (err) {
             console.log(err);
             res.status(500).json({ message: "Internal Server Error" });
         } else {
+            if (req.body.userId != data.rows[0].id) {
+                res.status(400).json({ message: "Invalid Profile URL" });
+            }
             res.status(200).json({
                 message: "Fetched succesfully",
                 userData: data.rows[0],

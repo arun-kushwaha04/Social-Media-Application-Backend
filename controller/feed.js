@@ -26,7 +26,7 @@ exports.getUserPost = (req, res) => {
     client.query(`SELECT postid,originalpostid,userid,originaluserid,description,images,postlikes,postcomments,postshare,datetime,t1.username,t1.profilephoto,t2.originalusername 
     FROM posts inner join users t1 on t1.id = userid 
     JOIN users t2 on posts.originaluserid = t2.id 
-    WHERE t1.username = '${req.body.username}' ORDER BY postid DESC;`, (err, data) => {
+    WHERE t1.username = '${req.body.username}' AND t1.id = ${req.body.userId} ORDER BY postid DESC;`, (err, data) => {
         if (err) {
             console.log(err);
             res.status(500).json({ message: "Internal Server Error" });
