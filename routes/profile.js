@@ -4,7 +4,7 @@ const { updatePassword, updateName, updateAbout, userInfo, updateProfilePhoto } 
 const router = express.Router();
 
 // router.post('/getUserData', verifyToken, userData);
-router.post('/getUserinfo', verifyToken, userInfo);
+router.post('/getUserinfo', userInfo);
 router.put('/updateName', verifyToken, updateName);
 router.put('/updatePassword', verifyToken, updatePassword);
 router.put('/updateProfilePhoto', verifyToken, updateProfilePhoto);
